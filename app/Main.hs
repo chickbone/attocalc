@@ -12,14 +12,17 @@ import Text.Read (readMaybe)
 type Wizard a = IO (IO a)
 
 main :: IO ()
-main = do
-  endless $ getLine >>= putStrLn . ("\x001B[1A\x001B[0J= " <>) . show . eval
-  void getChar
+main =
+  fix $ \loop -> do
+    putStrLn "\x001B[1A"
+    text <- getLine
+    putStrLn "\x001B[1A\x001B[0J"
+    putStr . ("\x001B[0J= " <>) . show . eval $ text
+    putStr "\x001B[1A"
+    unless (text == "q") loop
 
 endless :: Monad m => m a -> m b
-endless f = fix $ \loop -> do
-  f
-  loop
+endless f = fix $ \loop -> f >> loop
 
 push :: a -> State [a] ()
 push x = modify (x :)
