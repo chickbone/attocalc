@@ -13,7 +13,7 @@ type Wizard a = IO (IO a)
 
 main :: IO ()
 main = do
-  endless $ getLine >>= putStrLn . ("\x001B[1A\x001B[0J> " <>) . show . eval
+  endless $ getLine >>= putStrLn . ("\x001B[1A\x001B[0J= " <>) . show . eval
   void getChar
 
 endless :: Monad m => m a -> m b
@@ -39,10 +39,12 @@ rpn (x : xs) = push (read x) >> rpn xs
 rpn [] = pop
 
 check :: [String] -> [String]
-check = filter (\x -> isJust (readMaybe x :: Maybe Int) || x == "+" || x == "*" || x == "-")
+check str = if null text then ["0"] else text
+  where
+    text = filter (\x -> isJust (readMaybe x :: Maybe Integer) || x == "+" || x == "*" || x == "-") str
 
 eval :: String -> Int
-eval = (`evalState` []) . rpn . words
+eval = (`evalState` []) . rpn . check . words
 
 quest :: String -> Wizard ()
 quest str = do
