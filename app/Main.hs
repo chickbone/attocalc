@@ -38,15 +38,16 @@ op f = do
 rpn ("+" : xs) = op (+) >> rpn xs
 rpn ("*" : xs) = op (*) >> rpn xs
 rpn ("-" : xs) = op (-) >> rpn xs
+rpn ("/" : xs) = op (/) >> rpn xs
 rpn (x : xs) = push (read x) >> rpn xs
 rpn [] = pop
 
 check :: [String] -> [String]
 check str = if null text then ["0"] else text
   where
-    text = filter (\x -> isJust (readMaybe x :: Maybe Integer) || x == "+" || x == "*" || x == "-") str
+    text = filter (\x -> isJust (readMaybe x :: Maybe Double) || x == "+" || x == "*" || x == "-" || x == "/") str
 
-eval :: String -> Int
+eval :: String -> Double
 eval = (`evalState` []) . rpn . check . words
 
 quest :: String -> Wizard ()
