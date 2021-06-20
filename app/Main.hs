@@ -1,6 +1,54 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Main where
 
+import Control.Monad
+import Control.Monad.State
+import Data.Maybe
+import Data.Monoid ((<>))
 import Lib
+import Text.Read (readMaybe)
+
+type Wizard a = IO (IO a)
 
 main :: IO ()
-main = someFunc
+main = do
+  endless $ getLine >>= putStrLn . ("\x001B[1A\x001B[0J> " <>) . show . eval
+  void getChar
+
+endless :: Monad m => m a -> m b
+endless f = fix $ \loop -> do
+  f
+  loop
+
+push :: a -> State [a] ()
+push x = modify (x :)
+
+pop :: State [a] a
+pop = get >>= (\xs -> put (tail xs) >> return (head xs))
+
+op f = do
+  x <- pop
+  y <- pop
+  push $ f x y
+
+rpn ("+" : xs) = op (+) >> rpn xs
+rpn ("*" : xs) = op (*) >> rpn xs
+rpn ("-" : xs) = op (-) >> rpn xs
+rpn (x : xs) = push (read x) >> rpn xs
+rpn [] = pop
+
+check :: [String] -> [String]
+check = filter (\x -> isJust (readMaybe x :: Maybe Int) || x == "+" || x == "*" || x == "-")
+
+eval :: String -> Int
+eval = (`evalState` []) . rpn . words
+
+quest :: String -> Wizard ()
+quest str = do
+  putStrLn $ str <> "?: "
+  x <- getLine
+  return $ putStrLn $ str <> ": " <> x
+
+runWizard :: Wizard a -> IO a
+runWizard = join

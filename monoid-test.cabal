@@ -32,6 +32,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , mtl
   default-language: Haskell2010
 
 executable monoid-test-exe
@@ -44,6 +45,7 @@ executable monoid-test-exe
   build-depends:
       base >=4.7 && <5
     , monoid-test
+    , mtl
   default-language: Haskell2010
 
 test-suite monoid-test-test
@@ -57,4 +59,5 @@ test-suite monoid-test-test
   build-depends:
       base >=4.7 && <5
     , monoid-test
+    , mtl
   default-language: Haskell2010
