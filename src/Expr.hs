@@ -1,4 +1,4 @@
-module Expr (Expr(..),evalExpr,optimize) where
+module Expr (Expr (..), evalExpr, optimize) where
 
 data Expr a
   = Lit a
@@ -36,4 +36,3 @@ instance Eq a => Eq (Expr a) where
   Unary _ l == Unary _ r = l == r
   Binary _ l1 r1 == Binary _ l2 r2 = (l1 == l2) && (r1 == r2)
   _ == _ = False
-

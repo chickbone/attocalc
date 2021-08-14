@@ -22,9 +22,14 @@ addition =
 
 term :: Parser Integer
 term =
+  eval pow . many' $
+    char '*' *> apply (*) pow
+      <|> char '/' *> apply div pow
+
+pow :: Parser Integer
+pow =
   eval factor . many' $
-    char '*' *> apply (*) factor
-      <|> char '/' *> apply div factor
+    char '^' *> apply (^) factor
 
 factor :: Parser Integer
 factor = skipSpace *> (char '(' *> addition <* char ')' <|> num) <* skipSpace
