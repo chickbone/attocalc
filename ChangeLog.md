@@ -1,3 +1,3 @@
-# Changelog for monoid-test
+# Changelog for attocalc
 
 ## Unreleased changes
