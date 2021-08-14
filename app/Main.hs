@@ -1,60 +1,22 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
-import Control.Monad
-import Control.Monad.State
-import Data.Maybe
-import Data.Monoid ((<>))
+import Control.Monad (unless)
+import qualified Data.ByteString as BS
+import Data.Function (fix)
 import Lib
-import Text.Read (readMaybe)
-
-type Wizard a = IO (IO a)
 
 main :: IO ()
-main =
+main = putStrLn "This is a minimum calc. Please enter some expr:" *> mainloop
+
+mainloop :: IO ()
+mainloop =
   fix $ \loop -> do
     putStrLn "\x001B[1A"
-    text <- getLine
+    text <- BS.getLine
     putStrLn "\x001B[1A\x001B[0J"
-    putStr . ("\x001B[0J= " <>) . show . eval $ text
+    putStr . ("\x001B[0J= " <>) . runCalc $ text
     putStr "\x001B[1A"
     unless (text == "q") loop
-
-endless :: Monad m => m a -> m b
-endless f = fix $ \loop -> f >> loop
-
-push :: a -> State [a] ()
-push x = modify (x :)
-
-pop :: State [a] a
-pop = get >>= (\xs -> put (tail xs) >> return (head xs))
-
-op f = do
-  x <- pop
-  y <- pop
-  push $ f x y
-
-rpn ("+" : xs) = op (+) >> rpn xs
-rpn ("*" : xs) = op (*) >> rpn xs
-rpn ("-" : xs) = op (-) >> rpn xs
-rpn ("/" : xs) = op (/) >> rpn xs
-rpn (x : xs) = push (read x) >> rpn xs
-rpn [] = pop
-
-check :: [String] -> [String]
-check str = if null text then ["0"] else text
-  where
-    text = filter (\x -> isJust (readMaybe x :: Maybe Double) || x == "+" || x == "*" || x == "-" || x == "/") str
-
-eval :: String -> Double
-eval = (`evalState` []) . rpn . check . words
-
-quest :: String -> Wizard ()
-quest str = do
-  putStrLn $ str <> "?: "
-  x <- getLine
-  return $ putStrLn $ str <> ": " <> x
-
-runWizard :: Wizard a -> IO a
-runWizard = join
