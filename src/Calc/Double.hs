@@ -7,7 +7,7 @@ import Data.Attoparsec.ByteString.Char8 (char, digit)
 import Data.Function (fix)
 
 numD :: Parser Double
-numD = read <$> many1 digit
+numD = read <$> many1 (digit <|> char '.')
 
 termD ::
   Fractional a =>

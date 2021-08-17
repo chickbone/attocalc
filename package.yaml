@@ -37,6 +37,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - attocalc
+    - optparse-applicative
 
 tests:
   attocalc-test:

@@ -52,6 +52,7 @@ executable attocalc-exe
     , attoparsec
     , base >=4.7 && <5
     , bytestring
+    , optparse-applicative
   default-language: Haskell2010
 
 test-suite attocalc-test
