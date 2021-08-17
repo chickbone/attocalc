@@ -25,6 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      Calc.Common
+      Calc.Double
+      Calc.Int
       Expr
       Lib
   other-modules:

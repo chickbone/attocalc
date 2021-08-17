@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Expr (Expr (..), evalExpr, optimize) where
 
 data Expr a
@@ -11,6 +13,7 @@ evalExpr (Unary f e) = f (evalExpr e)
 evalExpr (Binary op l r) = evalExpr l `op` evalExpr r
 
 optimize' :: Expr a -> Expr a
+optimize' (Lit a) = Lit a
 optimize' (Unary g (Unary f e)) = optimize' $ Unary (g . f) e -- compose
 optimize' (Unary f (Binary op l r)) = optimize' $ Binary ((f .) . op) l r -- compose
 optimize' (Binary op (Unary f l) r) = optimize' $ Binary (op . f) l r
@@ -19,12 +22,11 @@ optimize' (Binary op (Lit a) r) = optimize' $ Unary (a `op`) r -- left reduce
 optimize' (Binary op l (Lit a)) = optimize' $ Unary (`op` a) l -- right reduce
 optimize' (Unary f e) = Unary f (optimize' e)
 optimize' (Binary op l r) = Binary op (optimize' l) (optimize' r)
-optimize' e = e
 
 optimize :: Eq a => Expr a -> Expr a
 optimize expr = if expr' == expr then expr else optimize expr'
   where
-    expr' = optimize' expr
+    !expr' = optimize' expr
 
 instance Show a => Show (Expr a) where
   show (Lit a) = "Lit " <> show a
