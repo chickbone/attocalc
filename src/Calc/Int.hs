@@ -1,32 +1,28 @@
 module Calc.Int (calc) where
 
-import Calc.Common (addition, apply, eval, factor)
+import Calc.AST
+import Calc.Common (apply, eval, factor)
 import Control.Applicative ((<|>))
-import Data.Attoparsec.ByteString (Parser, many', many1)
-import Data.Attoparsec.ByteString.Char8 (char, digit)
+import Data.Attoparsec.ByteString (Parser, many')
+import Data.Attoparsec.ByteString.Char8 (char, decimal)
 import Data.Function (fix)
 
-num :: Parser Integer
-num = read <$> many1 digit
-
-term ::
-  Integral a =>
-  -- | continue parser
-  Parser a ->
-  Parser a
+term :: Parser (CExpr Int) -> Parser (CExpr Int)
 term f =
   eval f . many' $
-    char '*' *> apply (*) f
-      <|> char '/' *> apply div f
+    char '*' *> apply Mul f
+      <|> char '/' *> apply Div f
 
-pow ::
-  Integral a =>
-  -- | continue parser
-  Parser a ->
-  Parser a
+pow :: Parser (CExpr Int) -> Parser (CExpr Int)
 pow f =
   eval f . many' $
-    char '^' *> apply (^) f
+    char '^' *> apply Pow f
 
-calc :: Parser Integer
-calc = fix (\f -> addition . term . pow $ factor f num)
+additionC :: Parser (CExpr a) -> Parser (CExpr a)
+additionC f =
+  eval f . many' $
+    char '+' *> apply Add f
+      <|> char '-' *> apply Sub f
+
+calc :: Parser (CExpr Int)
+calc = fix $ additionC . term . pow . factor (Lit <$> decimal)

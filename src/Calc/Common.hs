@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Calc.Common (eval, apply, addition, factor) where
 
 import Control.Applicative ((<|>))
@@ -10,15 +12,11 @@ eval m ops = foldl (\x f -> f x) <$> m <*> ops
 apply :: Functor f => (a1 -> a2 -> c) -> f a2 -> f (a1 -> c)
 apply op m = flip op <$> m
 
-addition ::
-  Num a =>
-  -- | continue parser
-  Parser a ->
-  Parser a
+addition :: Num a => Parser a -> Parser a
 addition f =
   eval f . many' $
     char '+' *> apply (+) f
       <|> char '-' *> apply (-) f
 
 factor :: Parser a -> Parser a -> Parser a
-factor f n = skipSpace *> (char '(' *> f <* char ')' <|> n) <* skipSpace
+factor num f = skipSpace *> (char '(' *> f <* char ')' <|> num) <* skipSpace
