@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Calc.Double (calcD) where
 
 import Calc.Common (addition, apply, eval, factor)
